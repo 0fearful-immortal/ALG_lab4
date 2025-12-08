@@ -36,12 +36,12 @@ GR::GR(int maxv) : num(0), n(0), m(0), maxv_(maxv){}
 void GR:: Create_manually(){
     vector<vector<int>> G(maxv_, vector<int>(maxv_, 0));
     string s;
-    cout << "Введите мн-ва смежности (строки букв a до z)\n";
+    cout << "Введите мн-ва смежности (строки букв a до z), 'ENTER' чтобы пропустить вершину и '1' чтобы завершить построение графа.\n";
     int current_n = 0;
     do {
         cout << "v[" << Ch(current_n) << "]=";
-        cin >> s;
-        if (s.empty() || !isalpha(s[0])) break;
+        getline(cin, s); 
+        if (s == "1") break;
         for (auto i : s)
             if (isalpha(i)) {
                 int j = (tolower(i) - 'a');
