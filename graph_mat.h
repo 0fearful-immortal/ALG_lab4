@@ -1,7 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <list>
-#include <stack>
 #include <cctype>
 #include <string>
 #include <queue>
@@ -12,11 +11,8 @@ const int MaxV = 26;
 
 class GR {
     private:
-    int num, n, m, maxv_, num_v;
+    int n, m, maxv_;
     vector <list<int>> LIST;
-    vector <int> NUM, L;
-    stack<pair<int, int>> STACK;
-    vector<bool> exists;
     void BFSDistance(int start);
     char Ch(int c) { return c + 'a'; }
 public:
@@ -27,7 +23,7 @@ public:
     ~GR() = default;
 };
 
-GR::GR(int maxv) : num(0), n(0), m(0), maxv_(maxv), num_v(0), exists(maxv_, false){}
+GR::GR(int maxv) : n(0), m(0), maxv_(maxv){}
 
 void GR::Create_manually() {
     int G[MaxV][MaxV];
@@ -39,18 +35,25 @@ void GR::Create_manually() {
         cout << "v[" << Ch(n) << "]=";
         getline(cin, s);
         if (s == "1") break;
-        exists[n] = true;
+        bool valid = true;
+        if (!s.empty()) {
+            for (auto i : s) {
+                if (!isalpha(i) && i != ' ') {
+                    valid = false;
+                    break;
+                }
+            }
+            if (!valid) cout << "Введены недопустимые символы (необходимо ввести только буквы a-z, 'ENTER' чтобы пропустить вершину и '1' чтобы завершить построение графа).\n";
+        }
         for (auto i : s)
             if (isalpha(i)) {
                 int j = (tolower(i) - 'a');
                 if (j < maxv_) {
                     G[n][j] = 1;
-                    exists[j] = true;
                 }
             }
         ++n;
     } while (n < maxv_);
-    for (bool val : exists) if (val) ++num_v;
     n = m = 0;
     LIST.resize(maxv_);
     for (int i = 0; i < maxv_; ++i) {
@@ -71,8 +74,7 @@ void GR::Create_manually() {
 
 void GR::Create_auto() {
     int G[MaxV][MaxV] = {0};
-    
-    string s;
+    srand(time(NULL));
     cout << "Сгенерированный граф:\n";
     int current_n = 0;
     do {
@@ -83,8 +85,6 @@ void GR::Create_auto() {
         ++current_n;
     } while (current_n < maxv_);
     
-    num_v = maxv_;
-    for (int i = 0; i < maxv_; ++i) exists[i] = true;
     LIST.resize(maxv_);
     for (int i = 0; i < maxv_; ++i) {
         for (int j = 0; j < maxv_; ++j) {
@@ -94,7 +94,7 @@ void GR::Create_auto() {
         }
     }
     
-    int n_vertices = 0;
+    int n_v = 0;
     int n_edges = 0;
     for (int i = 0; i < maxv_; ++i) {
         int f = 0;
@@ -108,11 +108,11 @@ void GR::Create_auto() {
             }
         }
         n_edges += f;
-        if (f) ++n_vertices;
+        if (f) ++n_v;
     }
-    n = n_vertices;
+    n = n_v;
     m = n_edges;
-    cout << "\n|V|=" << num_v << " |E|=" << m;
+    cout << "\n|V|=" << n_v << " |E|=" << m;
 }
 
 void GR::BFSDistance(int start) {
@@ -131,14 +131,13 @@ void GR::BFSDistance(int start) {
     }
     cout << "\nРасстояния от вершины " << Ch(start) << " до всех остальных вершин:\n";
     for (int i = 0; i < maxv_; ++i) {
-        if (exists[i] && i != start) {  // Выводим только для существующих вершин, кроме самой себя
-            if (dist[i] != -1) {
-                cout << Ch(i) << ": " << dist[i] << "\n";
-            } else {
-                cout << Ch(i) << ": inf\n";
-            }
+        if (dist[i] != -1) {
+            cout << Ch(i) << ":" << dist[i] << " ";
+        } else {
+            cout << Ch(i) << ":inf ";
         }
     }
+    
 }
 
 void GR::CheckDistance(){
@@ -146,7 +145,7 @@ void GR::CheckDistance(){
     cout << "\nВведите букву вершины (a-z) для подсчёта расстояний: ";
     cin >> letter;
     int index = tolower(letter) - 'a';
-    if (index < 0 || index >= maxv_ || !exists[index]) {  // Проверяем, что вершина существует
+    if (index < 0 || index >= maxv_) {
         cout << "Неверная буква. Допустимы существующие вершины.\n";
     }
     else {
