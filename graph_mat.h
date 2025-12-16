@@ -12,10 +12,11 @@ const int MaxV = 26;
 
 class GR {
     private:
-    int num, n, m, maxv_;
+    int num, n, m, maxv_, num_v;
     vector <list<int>> LIST;
     vector <int> NUM, L;
     stack<pair<int, int>> STACK;
+    vector<bool> exists;
     void BFSDistance(int start);
     char Ch(int c) { return c + 'a'; }
 public:
@@ -26,7 +27,7 @@ public:
     ~GR() = default;
 };
 
-GR::GR(int maxv) : num(0), n(0), m(0), maxv_(maxv){}
+GR::GR(int maxv) : num(0), n(0), m(0), maxv_(maxv), num_v(0), exists(maxv_, false){}
 
 void GR::Create_manually() {
     int G[MaxV][MaxV];
@@ -38,15 +39,18 @@ void GR::Create_manually() {
         cout << "v[" << Ch(n) << "]=";
         getline(cin, s);
         if (s == "1") break;
+        exists[n] = true;
         for (auto i : s)
             if (isalpha(i)) {
                 int j = (tolower(i) - 'a');
                 if (j < maxv_) {
                     G[n][j] = 1;
+                    exists[j] = true;
                 }
             }
         ++n;
     } while (n < maxv_);
+    for (bool val : exists) if (val) ++num_v;
     n = m = 0;
     LIST.resize(maxv_);
     for (int i = 0; i < maxv_; ++i) {
@@ -79,6 +83,8 @@ void GR::Create_auto() {
         ++current_n;
     } while (current_n < maxv_);
     
+    num_v = maxv_;
+    for (int i = 0; i < maxv_; ++i) exists[i] = true;
     LIST.resize(maxv_);
     for (int i = 0; i < maxv_; ++i) {
         for (int j = 0; j < maxv_; ++j) {
@@ -106,7 +112,7 @@ void GR::Create_auto() {
     }
     n = n_vertices;
     m = n_edges;
-    cout << "\n|V|=" << n << " |E|=" << m;
+    cout << "\n|V|=" << num_v << " |E|=" << m;
 }
 
 void GR::BFSDistance(int start) {
@@ -125,10 +131,12 @@ void GR::BFSDistance(int start) {
     }
     cout << "\nРасстояния от вершины " << Ch(start) << " до всех остальных вершин:\n";
     for (int i = 0; i < maxv_; ++i) {
-        if (dist[i] != -1) {
-            cout << Ch(i) << ": " << dist[i] << "\n";
-        } else {
-            cout << Ch(i) << ": inf\n";
+        if (exists[i] && i != start) {  // Выводим только для существующих вершин, кроме самой себя
+            if (dist[i] != -1) {
+                cout << Ch(i) << ": " << dist[i] << "\n";
+            } else {
+                cout << Ch(i) << ": inf\n";
+            }
         }
     }
 }
@@ -138,8 +146,8 @@ void GR::CheckDistance(){
     cout << "\nВведите букву вершины (a-z) для подсчёта расстояний: ";
     cin >> letter;
     int index = tolower(letter) - 'a';
-    if (index < 0 || index >= maxv_) {
-        cout << "Неверная буква. Допустимы a-z.\n";
+    if (index < 0 || index >= maxv_ || !exists[index]) {  // Проверяем, что вершина существует
+        cout << "Неверная буква. Допустимы существующие вершины.\n";
     }
     else {
         BFSDistance(index);
